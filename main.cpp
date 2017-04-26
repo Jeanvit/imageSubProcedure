@@ -2,12 +2,25 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <vector>
 #include <iostream>
 #include <string>
 
 using namespace cv;
 using namespace std;
 
+vector<uchar> whiteDotsVector(const Mat img){
+	Mat convertedImg;
+	vector<uchar> whiteDotsArray;
+	cvtColor(img,convertedImg,CV_BGR2GRAY);
+	for (int i=0;i<img.rows;i++)
+		for (int j=0;j<img.cols;j++){
+			if (convertedImg.at<uchar>(i,j)!=0){
+				whiteDotsArray.push_back(j);
+			}
+		}
+	return whiteDotsArray;
+}
 
 auto main() -> int{
 	Mat firstImage, secondImage, manualRVE;
@@ -18,9 +31,10 @@ auto main() -> int{
 	cin >> nameSecondImage;
 	firstImage=imread(nameFirstImage.c_str(), IMREAD_COLOR);
 	secondImage=imread(nameSecondImage,IMREAD_COLOR);
-	absdiff(firstImage, secondImage,manualRVE);
-
+	//absdiff(firstImage, secondImage,manualRVE);
+	manualRVE = firstImage - secondImage;
 	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
 	imshow("Main window", manualRVE);
+	whiteDotsVector(manualRVE);
 	waitKey(0);
 }
