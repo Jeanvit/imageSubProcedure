@@ -18,6 +18,6 @@ auto main() -> int {
 	imread(nameFirstImage, CV_LOAD_IMAGE_GRAYSCALE);
 	imread(nameSecondImage,CV_LOAD_IMAGE_GRAYSCALE);
 	manualRVE = firstImage - secondImage;
-	namedWindow( "Main window", CV_ WINDOW_KEEPRATIO );
+	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
 	imshow("Main window", manualRVE);
 }
