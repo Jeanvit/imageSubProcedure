@@ -3,13 +3,14 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 
+#include <math.h>
+
 #include <vector>
 #include <iostream>
 #include <string>
 
 using namespace cv;
 using namespace std;
-
 vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
 
@@ -39,10 +40,11 @@ auto main() -> int{
 
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots){
 	uint vectorSize = autoWhiteDots.size();
+	cout<<"i"<<vectorSize<<endl;
 	double sum=0;
 	double result=0;
 	for (uint i = 0;i<vectorSize;i++){
-		cout<<"i"<<i<<endl;
+		sum=sum+pow(static_cast<double>autoWhiteDots.at(i)-<static_cast<double>manualWhiteDots.at(i));
 	}
 	return result;
 }
@@ -57,6 +59,7 @@ vector<uint> whiteDotsVector(const Mat img){
 		for (auto j=0;j<img.cols;j++){
 			if (convertedImg.at<uchar>(i,j)!=0){
 				whiteDotsArray.push_back(j);
+				break;
 			}
 		}
 	return whiteDotsArray;
