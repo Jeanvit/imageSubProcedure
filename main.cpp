@@ -10,24 +10,12 @@
 using namespace cv;
 using namespace std;
 
-
-vector<uchar> whiteDotsVector(const Mat img){
-	Mat convertedImg;
-	vector<uchar> whiteDotsArray;
-	cvtColor(img,convertedImg,CV_BGR2GRAY);
-	namedWindow( "test window", CV_WINDOW_KEEPRATIO );
-	imshow("test window",convertedImg);
-	for (int i=0;i<img.rows;i++)
-		for (int j=0;j<img.cols;j++){
-			if (convertedImg.at<uchar>(i,j)!=0){
-				whiteDotsArray.push_back(j);
-			}
-		}
-	return whiteDotsArray;
-}
+vector<uint> whiteDotsVector(const Mat img);
+double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
 
 auto main() -> int{
-	Mat firstImage, secondImage, manualRVE;
+	Mat firstImage, secondImage, manualRVE,autoRVE;
+	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE;
 	string nameFirstImage, nameSecondImage;
 	cout << "Enter the name of first image" <<std::endl;
 	cin >> nameFirstImage;
@@ -39,6 +27,37 @@ auto main() -> int{
 	manualRVE = firstImage - secondImage;
 	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
 	imshow("Main window", manualRVE);
-	whiteDotsVector(manualRVE);
+	whiteDotsManualRVE=whiteDotsVector(manualRVE);
+	//whiteDotsAutoRVE=whiteDotsVector(autoRVE);
+
+	for (auto i=0;i<firstImage.rows;i++)
+		cout<< whiteDotsManualRVE.at(i) <<endl;
+
+	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsManualRVE);
 	waitKey(0);
+}
+
+double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots){
+	uint vectorSize = autoWhiteDots.size();
+	double sum=0;
+	double result=0;
+	for (uint i = 0;i<vectorSize;i++){
+		cout<<"i"<<i<<endl;
+	}
+	return result;
+}
+
+vector<uint> whiteDotsVector(const Mat img){
+	Mat convertedImg;
+	vector<uint> whiteDotsArray;
+	cvtColor(img,convertedImg,CV_BGR2GRAY);
+	namedWindow( "test window", CV_WINDOW_KEEPRATIO );
+	imshow("test window",convertedImg);
+	for (auto i=0;i<img.rows;i++)
+		for (auto j=0;j<img.cols;j++){
+			if (convertedImg.at<uchar>(i,j)!=0){
+				whiteDotsArray.push_back(j);
+			}
+		}
+	return whiteDotsArray;
 }
