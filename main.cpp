@@ -1,6 +1,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <vector>
 #include <iostream>
@@ -9,10 +10,13 @@
 using namespace cv;
 using namespace std;
 
+
 vector<uchar> whiteDotsVector(const Mat img){
 	Mat convertedImg;
 	vector<uchar> whiteDotsArray;
 	cvtColor(img,convertedImg,CV_BGR2GRAY);
+	namedWindow( "test window", CV_WINDOW_KEEPRATIO );
+	imshow("test window",convertedImg);
 	for (int i=0;i<img.rows;i++)
 		for (int j=0;j<img.cols;j++){
 			if (convertedImg.at<uchar>(i,j)!=0){
