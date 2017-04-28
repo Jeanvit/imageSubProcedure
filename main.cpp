@@ -22,8 +22,8 @@ auto main() -> int{
 	cin >> nameFirstImage;
 	cout << "Enter the name of second image" <<std::endl;
 	cin >> nameSecondImage;
-	firstImage=imread(nameFirstImage.c_str(), IMREAD_COLOR);
-	secondImage=imread(nameSecondImage,IMREAD_COLOR);
+	firstImage=imread(/*nameFirstImage.c_str()*/"a.png", IMREAD_COLOR);
+	secondImage=imread(/*nameSecondImage.c_str()*/"c.png",IMREAD_COLOR);
 	//absdiff(firstImage, secondImage,manualRVE);
 	manualRVE = firstImage - secondImage;
 	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
@@ -43,9 +43,14 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 	cout<<"i"<<vectorSize<<endl;
 	double sum=0;
 	double result=0;
+	/* RMSD COMPUTATION*/
+	/*x= root square of 1/n sum 1 until n (pointA-pointB) */
 	for (uint i = 0;i<vectorSize;i++){
-		sum=sum+pow(static_cast<double>autoWhiteDots.at(i)-<static_cast<double>manualWhiteDots.at(i));
+		//sum = sum + static_cast<double>(autoWhiteDots.at(i));
+		sum=sum+pow(static_cast<double>(autoWhiteDots.at(i))-static_cast<double>(manualWhiteDots.at(i)),2);
 	}
+	sum=sum*1/vectorSize;
+	result=sqrt(sum);
 	return result;
 }
 
