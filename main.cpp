@@ -11,19 +11,23 @@
 
 using namespace cv;
 using namespace std;
+
 vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
 
 auto main() -> int{
 	Mat firstImage, secondImage, manualRVE,autoRVE;
 	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE;
-	string nameFirstImage, nameSecondImage;
-	cout << "Enter the name of first image" <<std::endl;
+	string nameFirstImage, nameSecondImage, nameGeneratedRVE;
+	cout << "Enter the name of original image" <<std::endl;
 	//cin >> nameFirstImage;
-	cout << "Enter the name of second image" <<std::endl;
+	cout << "Enter the name of the manually marked image" <<std::endl;
 	//cin >> nameSecondImage;
+	cout << "Enter the name of the RVE image" <<std::endl;
+	//cin >> nameGeneratedRVE;
 	firstImage=imread(/*nameFirstImage.c_str()*/"a.png", IMREAD_COLOR);
 	secondImage=imread(/*nameSecondImage.c_str()*/"c.png",IMREAD_COLOR);
+	autoRVE=imread(/*nameSecondImage.c_str()*/"c.png",IMREAD_COLOR);
 	//absdiff(firstImage, secondImage,manualRVE);
 	manualRVE = firstImage - secondImage;
 	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
