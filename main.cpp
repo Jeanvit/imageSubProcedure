@@ -27,7 +27,7 @@ auto main() -> int{
 	//cin >> nameGeneratedRVE;
 	firstImage=imread(/*nameFirstImage.c_str()*/"a.png", IMREAD_COLOR);
 	secondImage=imread(/*nameSecondImage.c_str()*/"c.png",IMREAD_COLOR);
-	autoRVE=imread(/*nameSecondImage.c_str()*/"c.png",IMREAD_COLOR);
+	//autoRVE=imread(/*nameSecondImage.c_str()*/"c.png",IMREAD_COLOR);
 	//absdiff(firstImage, secondImage,manualRVE);
 	manualRVE = firstImage - secondImage;
 	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
