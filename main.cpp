@@ -2,6 +2,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
+#include <math.h>
 
 #include <math.h>
 
@@ -12,8 +13,10 @@
 using namespace cv;
 using namespace std;
 
+vector<uint> vectorMean (const vector<uint> a,const vector<uint>b);
 vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
+void createOutput(vector<uint> source, uint numRows, uint numCols);
 
 auto main() -> int{
 	Mat firstImage, secondImage, manualRVE,autoRVE;
@@ -25,9 +28,9 @@ auto main() -> int{
 	//cin >> nameSecondImage;
 	cout << "Enter the name of the RVE image" <<std::endl;
 	//cin >> nameGeneratedRVE;
-	firstImage=imread(/*nameFirstImage.c_str()*/"y.png", IMREAD_COLOR);
-	secondImage=imread(/*nameSecondImage.c_str()*/"x.png",IMREAD_COLOR);
-	autoRVE=imread(/*nameSecondImage.c_str()*/"z.png",IMREAD_COLOR);
+	firstImage=imread(/*nameFirstImage.c_str()*/"f.png", IMREAD_COLOR);
+	secondImage=imread(/*nameSecondImage.c_str()*/"e.png",IMREAD_COLOR);
+	autoRVE=imread(/*nameSecondImage.c_str()*/"g.png",IMREAD_COLOR);
 	//absdiff(firstImage, secondImage,manualRVE);
 	manualRVE = firstImage - secondImage;
 	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
@@ -35,41 +38,57 @@ auto main() -> int{
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 
-	vector<int> compression_params;
-	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-	compression_params.push_back(9);
-
-	imwrite("output.png", manualRVE, compression_params);
-
-	for (auto i=0;i<firstImage.rows;i++)
+	/*for (auto i=0;i<firstImage.rows;i++)
 		cout<< whiteDotsManualRVE.at(i) <<endl;
 
 	for (auto i=0;i<firstImage.rows;i++)
 			cout<< whiteDotsAutoRVE.at(i) <<endl;
 // TO DO
-	//CORRECT WHITE DOTS AUTO RVE DATA TO A CORRECT FILE
+	//CORRECT WHITE DOTS AUTO RVE DATA TO A CORRECT FILE*/
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
+	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols);
 	waitKey(0);
+}
+void createOutput(vector<uint> source, uint numRows, uint numCols){
+	Mat output;
+	Mat::zeros(numRows, numCols , CV_8U);
+	for (auto i=0;i<numRows;i++){
+		//output.at<uchar>(i,source.at(i))=255;
+	}
+	vector<int> compression_params;
+	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	compression_params.push_back(9);
+
+	imwrite("output.png", output, compression_params);
 }
 
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots){
 	int vectorSize = autoWhiteDots.size();
 	int manualVectorSize = manualWhiteDots.size();
-	cout<<"Tamanho do vetor: "<<vectorSize<<endl;
-	cout<<"Tamanho do vetor manual: "<<manualVectorSize<<endl;
+	cout<<"Auto vector size: "<<vectorSize<<endl;
+	cout<<"manual vector size: "<<manualVectorSize<<endl;
 
 	double sum=0;
 	double result=0;
-	/* RMSD COMPUTATION*/
+	/* RMSD*/
 	/*x= root square of 1/n sum 1 until n (pointA-pointB) */
-	for (uint i = 0;i<vectorSize;i++){
+	for (auto i = 0;i<vectorSize;i++){
 		sum=sum+pow(static_cast<double>(autoWhiteDots.at(i))-static_cast<double>(manualWhiteDots.at(i)),2);
 
 	}
-	sum=sum*1/vectorSize;
+	sum=sum/vectorSize;
 	result=sqrt(sum);
 	cout<<"result "<<result<<endl;
 	return result;
+}
+
+vector<uint> vectorMean (const vector<uint> a,const vector<uint>b){
+	vector<uint> mean;
+	for (auto i=a.begin();i<a.end();i++){
+		double value=floor((a.at(*i)-b.at(*i)/2));
+		mean.push_back(static_cast<uint>(value/2));
+	}
+	return mean;
 }
 
 vector<uint> whiteDotsVector(const Mat img){
