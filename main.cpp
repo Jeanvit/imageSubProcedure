@@ -18,21 +18,24 @@ vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
 void createOutput(vector<uint> source, uint numRows, uint numCols);
 
-auto main() -> int{
-	Mat firstImage, secondImage, manualRVE,autoRVE;
+auto main(int argc, char* argv[]) -> int{
+	Mat firstImage, secondImage, manualRVE,autoRVE,additionalImage;
 	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE;
 	string nameFirstImage, nameSecondImage, nameGeneratedRVE;
 	cout << "Enter the name of original image" <<std::endl;
-	//cin >> nameFirstImage;
+	cin >> nameFirstImage;
 	cout << "Enter the name of the manually marked image" <<std::endl;
-	//cin >> nameSecondImage;
+	cin >> nameSecondImage;
+	/*if (argc>2){
+			
+	}*/
 	cout << "Enter the name of the RVE image" <<std::endl;
-	//cin >> nameGeneratedRVE;
-	firstImage=imread(/*nameFirstImage.c_str()*/"f.png", IMREAD_COLOR);
-	secondImage=imread(/*nameSecondImage.c_str()*/"e.png",IMREAD_COLOR);
-	autoRVE=imread(/*nameSecondImage.c_str()*/"g.png",IMREAD_COLOR);
+	cin >> nameGeneratedRVE;
+	firstImage=imread(nameFirstImage.c_str(), IMREAD_COLOR);
+	secondImage=imread(nameSecondImage.c_str(),IMREAD_COLOR);
+	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_COLOR);
 	//absdiff(firstImage, secondImage,manualRVE);
-	manualRVE = firstImage - secondImage;
+	manualRVE = secondImage -firstImage;
 	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
 	imshow("Main window", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
@@ -49,17 +52,18 @@ auto main() -> int{
 	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols);
 	waitKey(0);
 }
+
 void createOutput(vector<uint> source, uint numRows, uint numCols){
-	Mat output;
-	Mat::zeros(numRows, numCols , CV_8U);
-	for (auto i=0;i<numRows;i++){
-		//output.at<uchar>(i,source.at(i))=255;
+	Mat output=	Mat::zeros(numRows, numCols , CV_8U);
+	for (uint i=0;i<numRows;i++){
+		output.at<uchar>(i,source.at(i))=255;;
 	}
 	vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
 	compression_params.push_back(9);
-
+	cout<<"Creating output image...";
 	imwrite("output.png", output, compression_params);
+	cout<<" output.png successfully created."<<endl;
 }
 
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots){
@@ -78,7 +82,7 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 	}
 	sum=sum/vectorSize;
 	result=sqrt(sum);
-	cout<<"result "<<result<<endl;
+	cout<<"The RMDS value is: "<<result<<endl;
 	return result;
 }
 
