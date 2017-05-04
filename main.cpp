@@ -2,33 +2,32 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
-#include <math.h>
 
 #include <math.h>
-
 #include <vector>
 #include <iostream>
 #include <string>
 
+/*******************************************************************************************/
 using namespace cv;
 using namespace std;
 
+/*******************************************************************************************/
 vector<uint> vectorMean (const vector<uint> a,const vector<uint>b);
 vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
-void createOutput(vector<uint> source, uint numRows, uint numCols);
+bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName);
 
+/*******************************************************************************************/
 auto main(int argc, char* argv[]) -> int{
-	Mat firstImage, secondImage, manualRVE,autoRVE,additionalImage;
-	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE;
-	string nameFirstImage, nameSecondImage, nameGeneratedRVE;
+	Mat firstImage, secondImage, manualRVE,autoRVE,additionalImage,additionalRVE;
+	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE,whieDotsAdditionalRVE, meanRVE;
+	string nameFirstImage, nameSecondImage, nameGeneratedRVE, nameAdditionalImage;
+
 	cout << "Enter the name of original image" <<std::endl;
 	cin >> nameFirstImage;
 	cout << "Enter the name of the manually marked image" <<std::endl;
 	cin >> nameSecondImage;
-	/*if (argc>2){
-			
-	}*/
 	cout << "Enter the name of the RVE image" <<std::endl;
 	cin >> nameGeneratedRVE;
 	firstImage=imread(nameFirstImage.c_str(), IMREAD_COLOR);
@@ -36,8 +35,17 @@ auto main(int argc, char* argv[]) -> int{
 	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_COLOR);
 	//absdiff(firstImage, secondImage,manualRVE);
 	manualRVE = secondImage -firstImage;
-	namedWindow( "Main window", CV_WINDOW_KEEPRATIO );
-	imshow("Main window", manualRVE);
+	if (argc>1){
+				cout << "An additional file containing the mean of the 2 images will  be created"<<endl;
+				cin >> nameAdditionalImage;
+				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_COLOR);
+				additionalRVE=additionalImage - firstImage;
+				whieDotsAdditionalRVE=whiteDotsVector(additionalRVE);
+				meanRVE=vectorMean(manualRVE,whieDotsAdditionalRVE);
+				createOutput(meanRVE,firstImage.rows,firstImage.cols,"meanRVe.png");
+	}
+	namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
+	imshow("Manual RVE", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 
@@ -45,15 +53,16 @@ auto main(int argc, char* argv[]) -> int{
 		cout<< whiteDotsManualRVE.at(i) <<endl;
 
 	for (auto i=0;i<firstImage.rows;i++)
-			cout<< whiteDotsAutoRVE.at(i) <<endl;
-// TO DO
-	//CORRECT WHITE DOTS AUTO RVE DATA TO A CORRECT FILE*/
+			cout<< whiteDotsAutoRVE.at(i) <<endl; */
+
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
-	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols);
+	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols,"ouput.png");
 	waitKey(0);
 }
 
-void createOutput(vector<uint> source, uint numRows, uint numCols){
+/*******************************************************************************************/
+/* This function creates a png image called output.png using a vector containing the col's white dots positions */
+bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName){
 	Mat output=	Mat::zeros(numRows, numCols , CV_8U);
 	for (uint i=0;i<numRows;i++){
 		output.at<uchar>(i,source.at(i))=255;;
@@ -62,10 +71,19 @@ void createOutput(vector<uint> source, uint numRows, uint numCols){
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
 	compression_params.push_back(9);
 	cout<<"Creating output image...";
-	imwrite("output.png", output, compression_params);
-	cout<<" output.png successfully created."<<endl;
+	try {
+		imwrite(fileName, output, compression_params);
+	}
+	catch (cv::Exception& ex) {
+	    cout<<"Error! Exception converting image to PNG format:"<< ex.what();
+	    return false;
+	}
+	cout<<fileName<<" successfully created."<<endl;
+	return true;
 }
 
+/*******************************************************************************************/
+/* This function compute the Root Mean Square Deviation (RMSD) of a couple of vectors */
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots){
 	int vectorSize = autoWhiteDots.size();
 	int manualVectorSize = manualWhiteDots.size();
@@ -86,6 +104,8 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 	return result;
 }
 
+/*******************************************************************************************/
+/* This function returns the mean of two vectors */
 vector<uint> vectorMean (const vector<uint> a,const vector<uint>b){
 	vector<uint> mean;
 	for (auto i=a.begin();i<a.end();i++){
@@ -95,6 +115,8 @@ vector<uint> vectorMean (const vector<uint> a,const vector<uint>b){
 	return mean;
 }
 
+/*******************************************************************************************/
+/* This function returns a vector containing non-zero pixels, one per line and column ,*/
 vector<uint> whiteDotsVector(const Mat img){
 	Mat convertedImg;
 	vector<uint> whiteDotsArray;
@@ -112,3 +134,4 @@ vector<uint> whiteDotsVector(const Mat img){
 	}
 	return whiteDotsArray;
 }
+/*******************************************************************************************/
