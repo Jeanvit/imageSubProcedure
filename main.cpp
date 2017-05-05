@@ -34,20 +34,26 @@ auto main(int argc, char* argv[]) -> int{
 	secondImage=imread(nameSecondImage.c_str(),IMREAD_COLOR);
 	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_COLOR);
 	//absdiff(firstImage, secondImage,manualRVE);
-	manualRVE = secondImage -firstImage;
-	if (argc>1){
-				cout << "An additional file containing the mean of the 2 images will  be created"<<endl;
-				cin >> nameAdditionalImage;
-				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_COLOR);
-				additionalRVE=additionalImage - firstImage;
-				whieDotsAdditionalRVE=whiteDotsVector(additionalRVE);
-				meanRVE=vectorMean(manualRVE,whieDotsAdditionalRVE);
-				createOutput(meanRVE,firstImage.rows,firstImage.cols,"meanRVe.png");
-	}
+	manualRVE = firstImage-secondImage ;
 	namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
 	imshow("Manual RVE", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
+	if (argc>1){
+				cout << "An additional file containing the mean of the 2 images will  be created"<<endl;
+				cin >> nameAdditionalImage;
+				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_COLOR);
+				additionalRVE= firstImage - additionalImage ;
+				whieDotsAdditionalRVE=whiteDotsVector(additionalRVE);
+
+				meanRVE=vectorMean(whiteDotsManualRVE,whieDotsAdditionalRVE);
+
+				createOutput(meanRVE,firstImage.rows,firstImage.cols,"meanRVE.png");
+				Mat show=imread("meanRVE.png",IMREAD_COLOR);
+				namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
+				imshow("Mean white dots image",show);
+
+	}
 
 	/*for (auto i=0;i<firstImage.rows;i++)
 		cout<< whiteDotsManualRVE.at(i) <<endl;
@@ -56,7 +62,7 @@ auto main(int argc, char* argv[]) -> int{
 			cout<< whiteDotsAutoRVE.at(i) <<endl; */
 
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
-	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols,"ouput.png");
+	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols,"output.png");
 	waitKey(0);
 }
 
@@ -108,9 +114,12 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 /* This function returns the mean of two vectors */
 vector<uint> vectorMean (const vector<uint> a,const vector<uint>b){
 	vector<uint> mean;
+
 	for (auto i=a.begin();i<a.end();i++){
-		double value=floor((a.at(*i)-b.at(*i)/2));
-		mean.push_back(static_cast<uint>(value/2));
+
+		double value=(a.at(*i)+b.at(*i))/2;
+		mean.push_back(static_cast<uint>(value));
+		//cout<<"a:"<<(a.at(*i))<<" b: "<<(b.at(*i))<<"mean:"<<static_cast<uint>(value)<<endl;
 	}
 	return mean;
 }
@@ -121,8 +130,8 @@ vector<uint> whiteDotsVector(const Mat img){
 	Mat convertedImg;
 	vector<uint> whiteDotsArray;
 	cvtColor(img,convertedImg,CV_BGR2GRAY);
-	namedWindow( "test window", CV_WINDOW_KEEPRATIO );
-	imshow("test window",convertedImg);
+	namedWindow( "White dots image", CV_WINDOW_KEEPRATIO );
+	imshow("White dots image",convertedImg);
 	for (auto i=0;i<img.rows;i++){
 		whiteDotsArray.push_back(0);
 		for (auto j=0;j<img.cols;j++){				/* This guarantees that the whitedots vector will have the same size as the image */
