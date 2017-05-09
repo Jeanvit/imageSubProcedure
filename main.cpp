@@ -30,11 +30,11 @@ auto main(int argc, char* argv[]) -> int{
 	cin >> nameSecondImage;
 	cout << "Enter the name of the RVE image" <<std::endl;
 	cin >> nameGeneratedRVE;
-	firstImage=imread(nameFirstImage.c_str(), IMREAD_COLOR);
-	secondImage=imread(nameSecondImage.c_str(),IMREAD_COLOR);
-	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_COLOR);
-	//absdiff(firstImage, secondImage,manualRVE);
-	manualRVE = firstImage-secondImage ;
+	firstImage=imread(nameFirstImage.c_str(), IMREAD_GRAYSCALE);
+	secondImage=imread(nameSecondImage.c_str(),IMREAD_GRAYSCALE);
+	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_GRAYSCALE);
+	absdiff(firstImage, secondImage,manualRVE);
+	//manualRVE = firstImage-secondImage ;
 	namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
 	imshow("Manual RVE", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
@@ -42,24 +42,24 @@ auto main(int argc, char* argv[]) -> int{
 	if (argc>1){
 				cout << "An additional file containing the mean of the 2 images will  be created"<<endl;
 				cin >> nameAdditionalImage;
-				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_COLOR);
+				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);
 				additionalRVE= firstImage - additionalImage ;
 				whieDotsAdditionalRVE=whiteDotsVector(additionalRVE);
 
 				meanRVE=vectorMean(whiteDotsManualRVE,whieDotsAdditionalRVE);
 
 				createOutput(meanRVE,firstImage.rows,firstImage.cols,"meanRVE.png");
-				Mat show=imread("meanRVE.png",IMREAD_COLOR);
+				Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
 				namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
 				imshow("Mean white dots image",show);
 
 	}
-
-	/*for (auto i=0;i<firstImage.rows;i++)
-		cout<< whiteDotsManualRVE.at(i) <<endl;
-
+	/*cout<<"Manual"<<endl;
 	for (auto i=0;i<firstImage.rows;i++)
-			cout<< whiteDotsAutoRVE.at(i) <<endl; */
+		cout<< whiteDotsManualRVE.at(i) <<endl;
+	cout<<"Auto"<<endl;
+	for (auto i=0;i<firstImage.rows;i++)
+			cout<< whiteDotsAutoRVE.at(i) <<endl;*/
 
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
 	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols,"output.png");
@@ -70,13 +70,15 @@ auto main(int argc, char* argv[]) -> int{
 /* This function creates a png image called output.png using a vector containing the col's white dots positions */
 bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName){
 	Mat output=	Mat::zeros(numRows, numCols , CV_8U);
+	cout<<"printing output..."<<endl;
 	for (uint i=0;i<numRows;i++){
-		output.at<uchar>(i,source.at(i))=255;;
+		output.at<uchar>(i,source.at(i))=255;
+		cout<<source.at(i);
+		cout<<endl;
 	}
 	vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-	compression_params.push_back(9);
-	cout<<"Creating output image...";
+	compression_params.push_back(9);	cout<<"Creating output image...";
 	try {
 		imwrite(fileName, output, compression_params);
 	}
@@ -106,7 +108,7 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 	}
 	sum=sum/vectorSize;
 	result=sqrt(sum);
-	cout<<"The RMDS value is: "<<result<<endl;
+	cout<<"The RMSD value is: "<<result<<endl;
 	return result;
 }
 
@@ -126,18 +128,18 @@ vector<uint> vectorMean (const vector<uint> a,const vector<uint>b){
 
 /*******************************************************************************************/
 /* This function returns a vector containing non-zero pixels, one per line and column ,*/
-vector<uint> whiteDotsVector(const Mat img){
-	Mat convertedImg;
+vector<uint> whiteDotsVector(const Mat convertedImg){
+	//Mat convertedImg;
 	vector<uint> whiteDotsArray;
-	cvtColor(img,convertedImg,CV_BGR2GRAY);
+	//cvtColor(img,convertedImg,CV_BGR2GRAY);
 	namedWindow( "White dots image", CV_WINDOW_KEEPRATIO );
 	imshow("White dots image",convertedImg);
-	for (auto i=0;i<img.rows;i++){
+	for (auto i=0;i<convertedImg.rows;i++){
 		whiteDotsArray.push_back(0);
-		for (auto j=0;j<img.cols;j++){				/* This guarantees that the whitedots vector will have the same size as the image */
-			if (convertedImg.at<uchar>(i,j)!=0){	/* even if there's no enough lines with white dots */
+		for (auto j=0;j<convertedImg.cols;j++){				/* This guarantees that the whitedots vector will have the same size as the image */
+			if (convertedImg.at<uchar>(i,j)>0){	/* even if there's no enough lines with white dots */
 				whiteDotsArray.at(whiteDotsArray.size()-1)=j;
-				break;
+				//break;
 			}
 		}
 	}
