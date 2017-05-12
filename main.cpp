@@ -34,7 +34,6 @@ auto main(int argc, char* argv[]) -> int{
 	secondImage=imread(nameSecondImage.c_str(),IMREAD_GRAYSCALE);
 	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_GRAYSCALE);
 	absdiff(firstImage, secondImage,manualRVE);
-	//manualRVE = firstImage-secondImage ;
 	namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
 	imshow("Manual RVE", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
@@ -54,12 +53,6 @@ auto main(int argc, char* argv[]) -> int{
 				imshow("Mean white dots image",show);
 
 	}
-	/*cout<<"Manual"<<endl;
-	for (auto i=0;i<firstImage.rows;i++)
-		cout<< whiteDotsManualRVE.at(i) <<endl;
-	cout<<"Auto"<<endl;
-	for (auto i=0;i<firstImage.rows;i++)
-			cout<< whiteDotsAutoRVE.at(i) <<endl;*/
 
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
 	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols,"output.png");
@@ -129,15 +122,13 @@ vector<uint> vectorMean (const vector<uint> a,const vector<uint>b){
 /*******************************************************************************************/
 /* This function returns a vector containing non-zero pixels, one per line and column ,*/
 vector<uint> whiteDotsVector(const Mat convertedImg){
-	//Mat convertedImg;
 	vector<uint> whiteDotsArray;
-	//cvtColor(img,convertedImg,CV_BGR2GRAY);
 	namedWindow( "White dots image", CV_WINDOW_KEEPRATIO );
 	imshow("White dots image",convertedImg);
 	for (auto i=0;i<convertedImg.rows;i++){
 		whiteDotsArray.push_back(0);
 		for (auto j=0;j<convertedImg.cols;j++){				/* This guarantees that the whitedots vector will have the same size as the image */
-			if (convertedImg.at<uchar>(i,j)>0){	/* even if there's no enough lines with white dots */
+			if (convertedImg.at<uchar>(i,j)>0){	            /* even if there's no enough lines with white dots */
 				whiteDotsArray.at(whiteDotsArray.size()-1)=j;
 				//break;
 			}
