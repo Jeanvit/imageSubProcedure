@@ -11,6 +11,8 @@
 /*******************************************************************************************/
 using namespace cv;
 using namespace std;
+/*******************************************************************************************/
+#define FILEEXTENSION 4
 
 /*******************************************************************************************/
 vector<uint> vectorMean (const vector<uint> a,const vector<uint>b);
@@ -40,14 +42,15 @@ auto main(int argc, char* argv[]) -> int{
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 	if (argc>1){
 				cout << "An additional file containing the mean of the 2 images will  be created"<<endl;
+				cout << "Enter the name of the additional image"<<endl;
 				cin >> nameAdditionalImage;
 				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);
-				additionalRVE= firstImage - additionalImage ;
+				absdiff(firstImage, additionalImage,additionalRVE);//additionalRVE= firstImage - additionalImage ;
 				whieDotsAdditionalRVE=whiteDotsVector(additionalRVE);
 
 				meanRVE=vectorMean(whiteDotsManualRVE,whieDotsAdditionalRVE);
 
-				createOutput(meanRVE,firstImage.rows,firstImage.cols,"meanRVE.png");
+				createOutput(meanRVE,firstImage.rows,firstImage.cols,nameFirstImage.substr(0,nameFirstImage.size()-FILEEXTENSION)+"meanRVE.png");
 				Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
 				namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
 				imshow("Mean white dots image",show);
@@ -63,12 +66,12 @@ auto main(int argc, char* argv[]) -> int{
 /* This function creates a png image called output.png using a vector containing the col's white dots positions */
 bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName){
 	Mat output=	Mat::zeros(numRows, numCols , CV_8U);
-	cout<<"printing output..."<<endl;
+	/*cout<<"printing output..."<<endl;
 	for (uint i=0;i<numRows;i++){
 		output.at<uchar>(i,source.at(i))=255;
 		cout<<source.at(i);
 		cout<<endl;
-	}
+	}*/
 	vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
 	compression_params.push_back(9);	cout<<"Creating output image...";
@@ -88,8 +91,6 @@ bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileNam
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots){
 	int vectorSize = autoWhiteDots.size();
 	int manualVectorSize = manualWhiteDots.size();
-	cout<<"Auto vector size: "<<vectorSize<<endl;
-	cout<<"manual vector size: "<<manualVectorSize<<endl;
 
 	double sum=0;
 	double result=0;
@@ -101,6 +102,7 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 	}
 	sum=sum/vectorSize;
 	result=sqrt(sum);
+	cout<<endl<<endl;
 	cout<<"The RMSD value is: "<<result<<endl;
 	return result;
 }
