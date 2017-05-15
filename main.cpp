@@ -25,7 +25,6 @@ auto main(int argc, char* argv[]) -> int{
 	Mat firstImage, secondImage, manualRVE,autoRVE,additionalImage,additionalRVE;
 	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE,whieDotsAdditionalRVE, meanRVE;
 	string nameFirstImage, nameSecondImage, nameGeneratedRVE, nameAdditionalImage;
-
 	cout << "Enter the name of original image" <<std::endl;
 	cin >> nameFirstImage;
 	cout << "Enter the name of the manually marked image" <<std::endl;
@@ -42,6 +41,7 @@ auto main(int argc, char* argv[]) -> int{
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 	if (argc>1){
 				cout << "An additional file containing the mean of the 2 images will  be created"<<endl;
+				int iterator = atoi(argv[1]);
 				cout << "Enter the name of the additional image"<<endl;
 				cin >> nameAdditionalImage;
 				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);
