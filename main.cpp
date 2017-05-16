@@ -15,7 +15,7 @@ using namespace std;
 #define FILEEXTENSION 4
 
 /*******************************************************************************************/
-vector<uint> vectorMean (const vector<uint> a,const vector<uint>b);
+vector<uint> vectorMean (const vector<uint> a, const int size);
 vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
 bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName);
@@ -23,8 +23,9 @@ bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileNam
 /*******************************************************************************************/
 auto main(int argc, char* argv[]) -> int{
 	Mat firstImage, secondImage, manualRVE,autoRVE,additionalImage,additionalRVE;
-	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE,whieDotsAdditionalRVE, meanRVE;
+	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE,whiteDotsAdditionalRVE, meanRVE, sumRVE;
 	string nameFirstImage, nameSecondImage, nameGeneratedRVE, nameAdditionalImage;
+	int totalImages = atoi(argv[1]);
 	cout << "Enter the name of original image" <<std::endl;
 	cin >> nameFirstImage;
 	cout << "Enter the name of the manually marked image" <<std::endl;
@@ -40,15 +41,23 @@ auto main(int argc, char* argv[]) -> int{
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 	if (argc>1){
-				cout << "An additional file containing the mean of the 2 images will  be created"<<endl;
-				int iterator = atoi(argv[1]);
-				cout << "Enter the name of the additional image"<<endl;
-				cin >> nameAdditionalImage;
-				additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);
-				absdiff(firstImage, additionalImage,additionalRVE);//additionalRVE= firstImage - additionalImage ;
-				whieDotsAdditionalRVE=whiteDotsVector(additionalRVE);
 
-				meanRVE=vectorMean(whiteDotsManualRVE,whieDotsAdditionalRVE);
+				sumRVE.resize(whiteDotsAutoRVE.size()); // sumRVE size is equal to WhitedotsRVE
+				fill(sumRVE.begin(), sumRVE.end(), 0); //  Starting sumRVE with zeros
+				cout << "An additional file containing the mean of "<<totalImages<<" images will  be created"<<endl;
+				for (auto i=0;i<totalImages;i++){
+					cout << "Enter the name of the"<< i <<" additional image"<<endl;
+					cin >> nameAdditionalImage;
+
+					additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);
+					absdiff(firstImage, additionalImage,additionalRVE);//additionalRVE= firstImage - additionalImage ;
+
+					whiteDotsAdditionalRVE=whiteDotsVector(additionalRVE);
+
+					transform(sumRVE.begin(),sumRVE.end(), whiteDotsAdditionalRVE.begin(),
+								               sumRVE.begin(), std::plus<uint>());
+				}
+				meanRVE=vectorMean(sumRVE,totalImages);
 
 				createOutput(meanRVE,firstImage.rows,firstImage.cols,nameFirstImage.substr(0,nameFirstImage.size()-FILEEXTENSION)+"meanRVE.png");
 				Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
@@ -90,7 +99,6 @@ bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileNam
 /* This function compute the Root Mean Square Deviation (RMSD) of a couple of vectors */
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots){
 	int vectorSize = autoWhiteDots.size();
-	int manualVectorSize = manualWhiteDots.size();
 
 	double sum=0;
 	double result=0;
@@ -109,12 +117,12 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 
 /*******************************************************************************************/
 /* This function returns the mean of two vectors */
-vector<uint> vectorMean (const vector<uint> a,const vector<uint>b){
+vector<uint> vectorMean (const vector<uint> a, const int size){
 	vector<uint> mean;
 
 	for (auto i=a.begin();i<a.end();i++){
 
-		double value=(a.at(*i)+b.at(*i))/2;
+		double value=(a.at(*i))/size;
 		mean.push_back(static_cast<uint>(value));
 		//cout<<"a:"<<(a.at(*i))<<" b: "<<(b.at(*i))<<"mean:"<<static_cast<uint>(value)<<endl;
 	}
