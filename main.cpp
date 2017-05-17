@@ -24,10 +24,11 @@ bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileNam
 auto main(int argc, char* argv[]) -> int{
 	Mat firstImage, secondImage, manualRVE,autoRVE,additionalImage,additionalRVE;
 	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE,whiteDotsAdditionalRVE, meanRVE, sumRVE;
-	string nameFirstImage, nameSecondImage, nameGeneratedRVE, nameAdditionalImage;
-	int totalImages = atoi(argv[1]);
+	string nameFirstImage, nameSecondImage, nameGeneratedRVE, nameAdditionalImage,name;
+	int totalImages=0;
 	cout << "Enter the name of original image" <<std::endl;
 	cin >> nameFirstImage;
+	name=nameFirstImage.substr(0,nameFirstImage.size()-FILEEXTENSION);
 	cout << "Enter the name of the manually marked image" <<std::endl;
 	cin >> nameSecondImage;
 	cout << "Enter the name of the RVE image" <<std::endl;
@@ -42,6 +43,7 @@ auto main(int argc, char* argv[]) -> int{
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 	if (argc>1){
 
+				totalImages = atoi(argv[1]);
 				sumRVE.resize(whiteDotsAutoRVE.size()); // sumRVE size is equal to WhitedotsRVE
 				fill(sumRVE.begin(), sumRVE.end(), 0); //  Starting sumRVE with zeros
 				cout << "An additional file containing the mean of "<<totalImages<<" images will  be created"<<endl;
@@ -58,19 +60,15 @@ auto main(int argc, char* argv[]) -> int{
 								               sumRVE.begin(), std::plus<uint>());
 				}
 				meanRVE=vectorMean(sumRVE,totalImages,whiteDotsAutoRVE.size());
-
-				//for (auto x : sumRVE)
-				//	cout<<"The value is "<<x<<endl;
-
-				createOutput(meanRVE,firstImage.rows,firstImage.cols,nameFirstImage.substr(0,nameFirstImage.size()-FILEEXTENSION)+"meanRVE.png");
+				createOutput(meanRVE,firstImage.rows,firstImage.cols,name+"meanRVE.png");
 				Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
-				namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
-				imshow("Mean white dots image",show);
+				//namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
+				//imshow("Mean white dots image",show);
 
 	}
 
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
-	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols,"output.png");
+	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols, name+"output.png");
 	waitKey(0);
 }
 
@@ -78,12 +76,12 @@ auto main(int argc, char* argv[]) -> int{
 /* This function creates a png image called output.png using a vector containing the col's white dots positions */
 bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName){
 	Mat output=	Mat::zeros(numRows, numCols , CV_8U);
-	/*cout<<"printing output..."<<endl;
+	cout<<"printing output..."<<endl;
 	for (uint i=0;i<numRows;i++){
-		output.at<uchar>(i,source.at(i))=255;
-		cout<<source.at(i);
-		cout<<endl;
-	}*/
+		if (source.at(i)!=0){
+			output.at<uchar>(i,source.at(i))=255;
+		}
+	}
 	vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
 	compression_params.push_back(9);	cout<<"Creating output image...";
@@ -123,7 +121,7 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 vector<uint> vectorMean (const vector<uint> a, const int size,const int rowSize){
 	vector<uint> mean;
 
-	for (int i=0;i<rowSize;i++){
+	for (auto i=0;i<rowSize;i++){
 
 		double value=(a.at(i))/size;
 		mean.push_back(static_cast<uint>(value));
