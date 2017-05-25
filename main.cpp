@@ -18,7 +18,9 @@ using namespace std;
 vector<uint> vectorMean (const vector<uint> a, const int size, const int rowSize);
 vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
-bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName);
+bool createOutput(vector<uint> source, uint numRows, uint numCols,const string fileName);
+bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols,const string fileName);
+bool fileExists(const string filename);
 
 /*******************************************************************************************/
 auto main(int argc, char* argv[]) -> int{
@@ -41,6 +43,7 @@ auto main(int argc, char* argv[]) -> int{
 	imshow("Manual RVE", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
+
 	if (argc>1){
 
 				totalImages = atoi(argv[1]);
@@ -56,6 +59,7 @@ auto main(int argc, char* argv[]) -> int{
 
 					whiteDotsAdditionalRVE=whiteDotsVector(additionalRVE);
 
+					createSumOfInputs(whiteDotsAdditionalRVE,firstImage.rows,firstImage.cols,name+"sum.png");
 					transform(sumRVE.begin(),sumRVE.end(), whiteDotsAdditionalRVE.begin(),
 								               sumRVE.begin(), std::plus<uint>());
 				}
@@ -69,12 +73,13 @@ auto main(int argc, char* argv[]) -> int{
 
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
 	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols, name+"output.png");
+	createSumOfInputs(whiteDotsManualRVE,firstImage.rows,firstImage.cols,name+"sum.png");
 	waitKey(0);
 }
 
 /*******************************************************************************************/
 /* This function creates a png image called output.png using a vector containing the col's white dots positions */
-bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileName){
+bool createOutput(vector<uint> source, uint numRows, uint numCols,const string fileName){
 	Mat output=	Mat::zeros(numRows, numCols , CV_8U);
 	cout<<"printing output..."<<endl;
 	for (uint i=0;i<numRows;i++){
@@ -84,7 +89,8 @@ bool createOutput(vector<uint> source, uint numRows, uint numCols,string fileNam
 	}
 	vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-	compression_params.push_back(9);	cout<<"Creating output image...";
+	compression_params.push_back(9);
+	cout<<"Creating output image...";
 	try {
 		imwrite(fileName, output, compression_params);
 	}
@@ -148,10 +154,16 @@ vector<uint> whiteDotsVector(const Mat convertedImg){
 	return whiteDotsArray;
 }
 /*******************************************************************************************/
-
-bool createSumofInputs(vector<uint> source, uint numRows, uint numCols,string fileName){
+/* This function creates an output containing the sum of all RVEs */
+bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols, const string fileName){
+	Mat sum;
 	cout<<"printing the RVE sum..."<<endl;
-	Mat sum=imread(fileName,IMREAD_GRAYSCALE);
+	if (!fileExists(fileName)){
+		sum=Mat::zeros(numRows, numCols , CV_8U);
+	} else{
+		sum=imread(fileName, IMREAD_GRAYSCALE);
+	}
+
 	for (uint i=0;i<numRows;i++){
 		if (source.at(i)!=0){
 			sum.at<uchar>(i,source.at(i))=255;
@@ -161,7 +173,7 @@ bool createSumofInputs(vector<uint> source, uint numRows, uint numCols,string fi
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
 	//compression_params.push_back(9);	cout<<"Creating output image...";
 	try {
-		imwrite("fileName.png", sum, compression_params);
+		imwrite(fileName, sum, compression_params);
 	}
 	catch (cv::Exception& ex) {
 	    cout<<"Error! Exception converting image to PNG format:"<< ex.what();
@@ -169,5 +181,11 @@ bool createSumofInputs(vector<uint> source, uint numRows, uint numCols,string fi
 	}
 	cout<<fileName<<" successfully created."<<endl;
 	return true;
+}
+/*******************************************************************************************/
+/* This functions verify whether the file exists or not*/
+bool fileExists(const string filename) {
+  std::ifstream ifile(filename.c_str());
+  return (bool)ifile;
 }
 /*******************************************************************************************/
