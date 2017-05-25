@@ -148,3 +148,26 @@ vector<uint> whiteDotsVector(const Mat convertedImg){
 	return whiteDotsArray;
 }
 /*******************************************************************************************/
+
+bool createSumofInputs(vector<uint> source, uint numRows, uint numCols,string fileName){
+	cout<<"printing the RVE sum..."<<endl;
+	Mat sum=imread(fileName,IMREAD_GRAYSCALE);
+	for (uint i=0;i<numRows;i++){
+		if (source.at(i)!=0){
+			sum.at<uchar>(i,source.at(i))=255;
+		}
+	}
+	vector<int> compression_params;
+	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	//compression_params.push_back(9);	cout<<"Creating output image...";
+	try {
+		imwrite("fileName.png", sum, compression_params);
+	}
+	catch (cv::Exception& ex) {
+	    cout<<"Error! Exception converting image to PNG format:"<< ex.what();
+	    return false;
+	}
+	cout<<fileName<<" successfully created."<<endl;
+	return true;
+}
+/*******************************************************************************************/
