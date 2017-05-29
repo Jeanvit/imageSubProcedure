@@ -11,14 +11,19 @@
 /*******************************************************************************************/
 using namespace cv;
 using namespace std;
+
 /*******************************************************************************************/
 #define FILEEXTENSION 4 //number of chars after the filename
+static const std::string SUMNAME = "sum.png";
+static const std::string MEANNAME = "meanRVE.png";
+static const std::string OUTPUTNAME = "output.png";
 
 /*******************************************************************************************/
 vector<uint> vectorMean (const vector<uint> a, const int size, const int rowSize);
 vector<uint> whiteDotsVector(const Mat img);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
 bool createOutput(vector<uint> source, uint numRows, uint numCols,const string fileName);
+bool createBlackSumImage(uint numRows, uint numCols, const string fileName);
 bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols,const string fileName);
 bool fileExists(const string filename);
 
@@ -44,7 +49,7 @@ auto main(int argc, char* argv[]) -> int{
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 	if (argc>1){
-
+				createBlackSumImage(firstImage.rows,firstImage.cols,name+SUMNAME);
 				totalImages = atoi(argv[1]);
 				sumRVE.resize(whiteDotsAutoRVE.size()); // sumRVE size is equal to WhitedotsRVE
 				fill(sumRVE.begin(), sumRVE.end(), 0); //  Starting sumRVE with zeros
@@ -60,22 +65,21 @@ auto main(int argc, char* argv[]) -> int{
 					absdiff(firstImage, additionalImage,additionalRVE);//additionalRVE= firstImage - additionalImage ;
 
 					whiteDotsAdditionalRVE=whiteDotsVector(additionalRVE);
-					createSumOfInputs(whiteDotsAdditionalRVE,firstImage.rows,firstImage.cols,name+"sum.png");
+					createSumOfInputs(whiteDotsAdditionalRVE,firstImage.rows,firstImage.cols,name+SUMNAME);
 					transform(sumRVE.begin(),sumRVE.end(), whiteDotsAdditionalRVE.begin(),
 								               sumRVE.begin(), std::plus<uint>());
 
 				}
 				meanRVE=vectorMean(sumRVE,totalImages+1,whiteDotsAutoRVE.size());
-				createOutput(meanRVE,firstImage.rows,firstImage.cols,name+"meanRVE.png");
+				createOutput(meanRVE,firstImage.rows,firstImage.cols,name+MEANNAME);
 				Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
 				//namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
 				//imshow("Mean white dots image",show);
 
 	}
-
+	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols, name+OUTPUTNAME);
+	createSumOfInputs(whiteDotsManualRVE,firstImage.rows,firstImage.cols,name+SUMNAME);
 	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
-	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols, name+"output.png");
-	createSumOfInputs(whiteDotsManualRVE,firstImage.rows,firstImage.cols,name+"sum.png");
 	waitKey(0);
 }
 
@@ -83,7 +87,6 @@ auto main(int argc, char* argv[]) -> int{
 /* This function creates a png image called output.png using a vector containing the col's white dots positions */
 bool createOutput(vector<uint> source, uint numRows, uint numCols,const string fileName){
 	Mat output=	Mat::zeros(numRows, numCols , CV_8U);
-	cout<<"printing output..."<<endl;
 	for (uint i=0;i<numRows;i++){
 		if (source.at(i)!=0){
 			output.at<uchar>(i,source.at(i))=255;
@@ -158,7 +161,7 @@ vector<uint> whiteDotsVector(const Mat convertedImg){
 /* This function creates an output containing the sum of all RVEs */
 bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols, const string fileName){
 	Mat sum;
-	cout<<"printing the RVE sum..."<<endl;
+	cout<<"updating the RVE sum..."<<endl;
 	if (!fileExists(fileName)){
 		sum=Mat::zeros(numRows, numCols , CV_8U);
 	} else{
@@ -180,7 +183,22 @@ bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols, const st
 	    cout<<"Error! Exception converting image to PNG format:"<< ex.what();
 	    return false;
 	}
-	cout<<fileName<<" successfully created."<<endl;
+	return true;
+}
+/*******************************************************************************************/
+/*A new image containing only 0 will to be used by the createSumOfInputs() function will be created by this function*/
+bool createBlackSumImage(uint numRows, uint numCols, const string fileName){
+	Mat sum=Mat::zeros(numRows, numCols , CV_8U);
+	vector<int> compression_params;
+	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	//compression_params.push_back(9);	cout<<"Creating output image...";
+	try {
+		imwrite(fileName, sum, compression_params);
+	}
+	catch (cv::Exception& ex) {
+	    cout<<"Error! Exception converting image to PNG format:"<< ex.what();
+	    return false;
+	}
 	return true;
 }
 /*******************************************************************************************/
