@@ -43,27 +43,29 @@ auto main(int argc, char* argv[]) -> int{
 	imshow("Manual RVE", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
-
 	if (argc>1){
 
 				totalImages = atoi(argv[1]);
 				sumRVE.resize(whiteDotsAutoRVE.size()); // sumRVE size is equal to WhitedotsRVE
 				fill(sumRVE.begin(), sumRVE.end(), 0); //  Starting sumRVE with zeros
+				transform(sumRVE.begin(),sumRVE.end(), whiteDotsManualRVE.begin(),
+												               sumRVE.begin(), std::plus<uint>());
+
 				cout << "An additional file containing the mean of "<<totalImages<<" images will  be created"<<endl;
 				for (auto i=0;i<totalImages;i++){
+					fill(whiteDotsAdditionalRVE.begin(), whiteDotsAdditionalRVE.end(), 0);
 					cout << "Enter the name of the image number "<< i+1 <<endl;
 					cin >> nameAdditionalImage;
-
 					additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);
 					absdiff(firstImage, additionalImage,additionalRVE);//additionalRVE= firstImage - additionalImage ;
 
 					whiteDotsAdditionalRVE=whiteDotsVector(additionalRVE);
-
 					createSumOfInputs(whiteDotsAdditionalRVE,firstImage.rows,firstImage.cols,name+"sum.png");
 					transform(sumRVE.begin(),sumRVE.end(), whiteDotsAdditionalRVE.begin(),
 								               sumRVE.begin(), std::plus<uint>());
+
 				}
-				meanRVE=vectorMean(sumRVE,totalImages,whiteDotsAutoRVE.size());
+				meanRVE=vectorMean(sumRVE,totalImages+1,whiteDotsAutoRVE.size());
 				createOutput(meanRVE,firstImage.rows,firstImage.cols,name+"meanRVE.png");
 				Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
 				//namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
@@ -131,7 +133,6 @@ vector<uint> vectorMean (const vector<uint> a, const int size,const int rowSize)
 
 		double value=(a.at(i))/size;
 		mean.push_back(static_cast<uint>(value));
-		cout<<"posistion: "<<(i)<<"mean:"<<static_cast<uint>(value)<<endl;
 	}
 	return mean;
 }
