@@ -79,7 +79,7 @@ auto main(int argc, char* argv[]) -> int{
 	}
 	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols, name+OUTPUTNAME);
 	createSumOfInputs(whiteDotsManualRVE,firstImage.rows,firstImage.cols,name+SUMNAME);
-	rootMeanSquareDeviation(whiteDotsManualRVE,whiteDotsAutoRVE);
+	rootMeanSquareDeviation(meanRVE,whiteDotsAutoRVE);
 	waitKey(0);
 }
 
