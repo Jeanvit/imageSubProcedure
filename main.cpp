@@ -21,33 +21,58 @@ static const std::string OUTPUTNAME = "output.png";
 /*******************************************************************************************/
 vector<uint> vectorMean (const vector<uint> a, const int size, const int rowSize);
 vector<uint> whiteDotsVector(const Mat img);
+vector<uint> RealSizeWhiteDotsVector(const Mat convertedImg, int* firstPos);
 double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots);
 bool createOutput(vector<uint> source, uint numRows, uint numCols,const string fileName);
 bool createBlackSumImage(uint numRows, uint numCols, const string fileName);
+
+double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots, int startingPos);
 bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols,const string fileName);
 bool fileExists(const string filename);
 
 /*******************************************************************************************/
 auto main(int argc, char* argv[]) -> int{
 	Mat firstImage, secondImage, manualRVE,autoRVE,additionalImage,additionalRVE;
-	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE,whiteDotsAdditionalRVE, meanRVE, sumRVE;
+	vector<uint> whiteDotsManualRVE,whiteDotsAutoRVE,whiteDotsAdditionalRVE, proportionalwhiteDotsAutoRVE, proportionalMeanRVE,meanRVE, sumRVE;
 	string nameFirstImage, nameSecondImage, nameGeneratedRVE, nameAdditionalImage,name;
 	int totalImages=0;
 	cout << "Enter the name of original image" <<std::endl;
 	cin >> nameFirstImage;
-	name=nameFirstImage.substr(0,nameFirstImage.size()-FILEEXTENSION);
-	cout << "Enter the name of the manually marked image" <<std::endl;
+	name=nameFirstImage.substr(0,nameFirstImage.size()-(FILEEXTENSION+1));
+	/*cout << "Enter the name of the manually marked image" <<std::endl;
 	cin >> nameSecondImage;
 	cout << "Enter the name of the RVE image" <<std::endl;
-	cin >> nameGeneratedRVE;
+	cin >> nameGeneratedRVE;*/
+
 	firstImage=imread(nameFirstImage.c_str(), IMREAD_GRAYSCALE);
-	secondImage=imread(nameSecondImage.c_str(),IMREAD_GRAYSCALE);
-	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_GRAYSCALE);
+
+	/*secondImage=imread(nameSecondImage.c_str(),IMREAD_GRAYSCALE);
+	autoRVE=imread(nameGeneratedRVE.c_str(),IMREAD_GRAYSCALE);*/
+
+	secondImage=imread(name+"1.png",IMREAD_GRAYSCALE);
+	autoRVE=imread(name+"p.png",IMREAD_GRAYSCALE);
+
+
+
 	absdiff(firstImage, secondImage,manualRVE);
-	namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
-	imshow("Manual RVE", manualRVE);
+	//namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
+	//imshow("Manual RVE", manualRVE);
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
-	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
+
+
+
+
+	//uncomment for normal execution
+	//whiteDotsAutoRVE=whiteDotsVector(autoRVE);
+
+
+	//
+	int first;
+	whiteDotsAutoRVE=RealSizeWhiteDotsVector(autoRVE,&first);
+	cout<<"VALOR FIRST"<<first<<endl;
+
+
+	cout<<"TAMANHO DO VETOR WHITEDOTS"<<whiteDotsAutoRVE.size()<<endl;
 	if (argc>1){
 				createBlackSumImage(firstImage.rows,firstImage.cols,name+SUMNAME);
 				totalImages = atoi(argv[1]);
@@ -59,9 +84,12 @@ auto main(int argc, char* argv[]) -> int{
 				cout << "An additional file containing the mean of "<<totalImages<<" images will  be created"<<endl;
 				for (auto i=0;i<totalImages;i++){
 					fill(whiteDotsAdditionalRVE.begin(), whiteDotsAdditionalRVE.end(), 0);
-					cout << "Enter the name of the image number "<< i+1 <<endl;
+
+					/*cout << "Enter the name of the image number "<< i+1 <<endl;
 					cin >> nameAdditionalImage;
-					additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);
+					additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);*/
+
+					additionalImage=imread(name+ "2.png",IMREAD_GRAYSCALE);
 					absdiff(firstImage, additionalImage,additionalRVE);//additionalRVE= firstImage - additionalImage ;
 
 					whiteDotsAdditionalRVE=whiteDotsVector(additionalRVE);
@@ -70,16 +98,18 @@ auto main(int argc, char* argv[]) -> int{
 								               sumRVE.begin(), std::plus<uint>());
 
 				}
+
 				meanRVE=vectorMean(sumRVE,totalImages+1,whiteDotsAutoRVE.size());
 				createOutput(meanRVE,firstImage.rows,firstImage.cols,name+MEANNAME);
-				Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
+				//Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
 				//namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
 				//imshow("Mean white dots image",show);
 
 	}
 	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols, name+OUTPUTNAME);
 	createSumOfInputs(whiteDotsManualRVE,firstImage.rows,firstImage.cols,name+SUMNAME);
-	rootMeanSquareDeviation(meanRVE,whiteDotsAutoRVE);
+	//rootMeanSquareDeviation(meanRVE,whiteDotsAutoRVE);
+	RealsizeRootMeanSquareDeviation(meanRVE,whiteDotsAdditionalRVE,first);
 	waitKey(0);
 }
 
@@ -126,7 +156,24 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uin
 	cout<<"The RMSD value is: "<<result<<endl;
 	return result;
 }
+/********************************************************************************************/
+double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots,const vector<uint> manualWhiteDots, int startingPos){
+	int vectorSize = autoWhiteDots.size()+startingPos;
 
+	double sum=0;
+	double result=0;
+	/* RMSD*/
+	/*x= root square of 1/n sum 1 until n (pointA-pointB) */
+	for (auto i = startingPos;i<vectorSize;i++){
+		sum=sum+pow(static_cast<double>(autoWhiteDots.at(i))-static_cast<double>(manualWhiteDots.at(i)),2);
+
+	}
+	sum=sum/vectorSize;
+	result=sqrt(sum);
+	cout<<endl<<endl;
+	cout<<"The PROPORTIONAL RMSD value is: "<<result<<endl;
+	return result;
+}
 /*******************************************************************************************/
 /* This function returns the mean of two vectors */
 vector<uint> vectorMean (const vector<uint> a, const int size,const int rowSize){
@@ -144,8 +191,8 @@ vector<uint> vectorMean (const vector<uint> a, const int size,const int rowSize)
 /* This function returns a vector containing non-zero pixels, one per line and column ,*/
 vector<uint> whiteDotsVector(const Mat convertedImg){
 	vector<uint> whiteDotsArray;
-	namedWindow( "White dots image", CV_WINDOW_KEEPRATIO );
-	imshow("White dots image",convertedImg);
+	//namedWindow( "White dots image", CV_WINDOW_KEEPRATIO );
+	//imshow("White dots image",convertedImg);
 	for (auto i=0;i<convertedImg.rows;i++){
 		whiteDotsArray.push_back(0);
 		for (auto j=0;j<convertedImg.cols;j++){				/* This guarantees that the whitedots vector will have the same size as the image */
@@ -155,6 +202,26 @@ vector<uint> whiteDotsVector(const Mat convertedImg){
 			}
 		}
 	}
+	return whiteDotsArray;
+}
+/*******************************************************************************************/
+/* Use the size of the white dots instead of total image size */
+vector<uint> RealSizeWhiteDotsVector(const Mat convertedImg, int *firstPos){
+	vector<uint> whiteDotsArray;
+	//namedWindow( "White dots image", CV_WINDOW_KEEPRATIO );
+	//imshow("White dots image",convertedImg);
+	for (auto i=0;i<convertedImg.rows;i++){
+		for (auto j=0;j<convertedImg.cols;j++){
+			if (convertedImg.at<uchar>(i,j)>0){
+				whiteDotsArray.push_back(j);
+				break;
+			}
+			if (whiteDotsArray.size()==1){
+				*firstPos=i-1;
+			}
+		}
+	}
+	//out<<"VALOR FUNCAO "<<whiteDotsArray.size()<<endl;
 	return whiteDotsArray;
 }
 /*******************************************************************************************/
