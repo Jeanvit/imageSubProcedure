@@ -56,27 +56,14 @@ auto main(int argc, char* argv[]) -> int{
 
 	secondImage=imread(name+"1.png",IMREAD_GRAYSCALE);
 	autoRVE=imread(name+"p.png",IMREAD_GRAYSCALE);
-
-
-
 	absdiff(firstImage, secondImage,manualRVE);
 
 	//namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
 	//imshow("Manual RVE", manualRVE);
 
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
-
-
-
-
-		whiteDotsAutoRVE=whiteDotsVector(autoRVE);
-
-
-
+	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 	proportionalwhiteDotsAutoRVE=RealSizeWhiteDotsVector(autoRVE,&firstPosition);
-	cout<<"VALOR FIRST"<<firstPosition<<endl;
-	cout<<"TAMANHO DO VETOR WHITEDOTS"<<proportionalwhiteDotsAutoRVE.size()<<endl;
-
 	if (argc>1){
 				createBlackSumImage(firstImage.rows,firstImage.cols,name+SUMNAME);
 				totalImages = atoi(argv[1]);
@@ -114,7 +101,7 @@ auto main(int argc, char* argv[]) -> int{
 	createOutput(whiteDotsManualRVE,firstImage.rows,firstImage.cols, name+OUTPUTNAME);
 	createSumOfInputs(whiteDotsManualRVE,firstImage.rows,firstImage.cols,name+SUMNAME);
 	rootMeanSquareDeviation(meanRVE,whiteDotsAutoRVE);
-	RealsizeRootMeanSquareDeviation(proportionalMeanRVE,whiteDotsAdditionalRVE,firstPosition);
+	RealsizeRootMeanSquareDeviation(proportionalwhiteDotsAutoRVE,whiteDotsAdditionalRVE,firstPosition);
 	waitKey(0);
 }
 
@@ -171,12 +158,10 @@ double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots,const ve
 	/*x= root square of 1/n sum 1 until n (pointA-pointB) */
 	for (auto i = 0;i<vectorSize;i++){
 		sum=sum+pow(static_cast<double>(autoWhiteDots.at(i))-static_cast<double>(manualWhiteDots.at(i+startingPos)),2);
-
-
 	}
+
 	sum=sum/vectorSize;
 	result=sqrt(sum);
-	cout<<endl<<endl;
 	cout<<"The PROPORTIONAL RMSD value is: "<<result<<endl;
 	return result;
 }
@@ -184,7 +169,6 @@ double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots,const ve
 /* This function returns the mean of two vectors */
 vector<uint> vectorMean (const vector<uint> a, const int size,const int rowSize){
 	vector<uint> mean;
-
 	for (auto i=0;i<rowSize;i++){
 
 		double value=(a.at(i))/size;
@@ -197,9 +181,9 @@ vector<uint> vectorMean (const vector<uint> a, const int size,const int rowSize)
 vector<uint> proportionalVectorMean (const vector<uint> a, const int size,const int rowSize,int start){
 	vector<uint> mean;
 
-	for (auto i=start;i<rowSize+start;i++){
+	for (auto i=start;i<rowSize;i++){
 
-		double value=(a.at(i))/size;
+		double value=(a.at(i+start))/size;
 		mean.push_back(static_cast<uint>(value));
 	}
 	return mean;
@@ -229,7 +213,7 @@ vector<uint> RealSizeWhiteDotsVector(const Mat convertedImg, int *firstPos){
 	//imshow("White dots image",convertedImg);
 	for (auto i=0;i<convertedImg.rows;i++){
 		for (auto j=0;j<convertedImg.cols;j++){
-			if (convertedImg.at<uchar>(i,j)>0){
+			if (convertedImg.at<uchar>(i,j)==255){
 				whiteDotsArray.push_back(j);
 				break;
 			}
@@ -238,7 +222,6 @@ vector<uint> RealSizeWhiteDotsVector(const Mat convertedImg, int *firstPos){
 			}
 		}
 	}
-	//out<<"VALOR FUNCAO "<<whiteDotsArray.size()<<endl;
 	return whiteDotsArray;
 }
 /*******************************************************************************************/
