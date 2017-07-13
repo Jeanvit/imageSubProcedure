@@ -8,7 +8,7 @@ With the RMSD value, I can consistently evaluate the processed image quality.
 # Additional information
 
 This is a small part of a bigger project, related to Human Spine Detection.
-To know more, feel free to contact me at jeanvitordepaulo@gmail.com
+For additional information, feel free to contact me at jeanvitordepaulo@gmail.com
 
 
 
