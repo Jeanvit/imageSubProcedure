@@ -18,7 +18,7 @@ static const std::string SUMNAME = "sum.png";
 static const std::string MEANNAME = "meanRVE.png";
 static const std::string OUTPUTNAME = "output.png";
 
-/*******************************************************************************************/
+/******************************************************************************************/
 vector<uint> vectorMean (const vector<uint> a, const int size, const int rowSize);
 vector<uint> whiteDotsVector(const Mat img);
 vector<uint> RealSizeWhiteDotsVector(const Mat convertedImg, int* firstPos);
@@ -61,9 +61,11 @@ auto main(int argc, char* argv[]) -> int{
 	//namedWindow( "Manual RVE", CV_WINDOW_KEEPRATIO );
 	//imshow("Manual RVE", manualRVE);
 
+	clock_t begin = clock();
 	whiteDotsManualRVE=whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE=whiteDotsVector(autoRVE);
 	proportionalwhiteDotsAutoRVE=RealSizeWhiteDotsVector(autoRVE,&firstPosition);
+
 	if (argc>1){
 				createBlackSumImage(firstImage.rows,firstImage.cols,name+SUMNAME);
 				totalImages = atoi(argv[1]);
@@ -79,10 +81,11 @@ auto main(int argc, char* argv[]) -> int{
 					/*cout << "Enter the name of the image number "<< i+1 <<endl;
 					cin >> nameAdditionalImage;
 					additionalImage=imread(nameAdditionalImage.c_str(),IMREAD_GRAYSCALE);*/
-
-					additionalImage=imread(name+ "2.png",IMREAD_GRAYSCALE);
+					ostringstream convert;
+					convert<<(i+1);
+					additionalImage=imread(name+convert.str()+".png",IMREAD_GRAYSCALE);
 					absdiff(firstImage, additionalImage,additionalRVE);//additionalRVE= firstImage - additionalImage ;
-
+					std::cout<<"Procesing: " + (name+convert.str()+ ".png" + " ");
 					whiteDotsAdditionalRVE=whiteDotsVector(additionalRVE);
 					createSumOfInputs(whiteDotsAdditionalRVE,firstImage.rows,firstImage.cols,name+SUMNAME);
 					transform(sumRVE.begin(),sumRVE.end(), whiteDotsAdditionalRVE.begin(),
@@ -102,6 +105,9 @@ auto main(int argc, char* argv[]) -> int{
 	createSumOfInputs(whiteDotsManualRVE,firstImage.rows,firstImage.cols,name+SUMNAME);
 	rootMeanSquareDeviation(meanRVE,whiteDotsAutoRVE);
 	RealsizeRootMeanSquareDeviation(proportionalwhiteDotsAutoRVE,whiteDotsAdditionalRVE,firstPosition);
+	 clock_t end = clock();
+	 double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	cout<<"ELAPSED TIME:  "<< elapsed_secs << "seconds";
 	waitKey(0);
 }
 
