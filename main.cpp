@@ -19,37 +19,27 @@ static const std::string MEANNAME = "meanRVE.png";
 static const std::string OUTPUTNAME = "output.png";
 
 /******************************************************************************************/
-vector<uint> vectorMean(const vector<uint> a, const int size,
-		const int rowSize);
+vector<uint> vectorMean(const vector<uint> a, const int size,const int rowSize);
 vector<uint> whiteDotsVector(const Mat img);
 vector<uint> RealSizeWhiteDotsVector(const Mat convertedImg, int* firstPos);
-double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,
-		const vector<uint> manualWhiteDots);
-bool createOutput(vector<uint> source, uint numRows, uint numCols,
-		const string fileName);
+vector<uint> proportionalVectorMean(const vector<uint> a, const int size, const int rowSize, int start);
+double rootMeanSquareDeviation(const vector<uint> autoWhiteDots, const vector<uint> manualWhiteDots);
+double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots, const vector<uint> manualWhiteDots, int startingPos);
+bool createOutput(vector<uint> source, uint numRows, uint numCols, const string fileName);
 bool createBlackSumImage(uint numRows, uint numCols, const string fileName);
-vector<uint> proportionalVectorMean(const vector<uint> a, const int size,
-		const int rowSize, int start);
-double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots,
-		const vector<uint> manualWhiteDots, int startingPos);
-bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols,
-		const string fileName);
+bool createSumOfInputs(vector<uint> source, uint numRows, uint numCols,	const string fileName);
 bool fileExists(const string filename);
 
 /*******************************************************************************************/
 auto main(int argc, char* argv[]) -> int {
-	Mat firstImage, secondImage, manualRVE, autoRVE, additionalImage,
-			additionalRVE;
-	vector<uint> whiteDotsManualRVE, whiteDotsAutoRVE, whiteDotsAdditionalRVE,
-			proportionalwhiteDotsAutoRVE, proportionalMeanRVE, meanRVE, sumRVE;
-	string nameFirstImage, nameSecondImage, nameGeneratedRVE,
-			nameAdditionalImage, name;
+	Mat firstImage, secondImage, manualRVE, autoRVE, additionalImage, additionalRVE;
+	vector<uint> whiteDotsManualRVE, whiteDotsAutoRVE, whiteDotsAdditionalRVE, proportionalwhiteDotsAutoRVE, proportionalMeanRVE, meanRVE, sumRVE;
+	string nameFirstImage, nameSecondImage, nameGeneratedRVE, nameAdditionalImage, name;
 	int totalImages = 0;
 	int firstPosition; 				//Indication of the first non-0 pixel;
 	cout << "Enter the name of original image" << std::endl;
 	cin >> nameFirstImage;
-	name = nameFirstImage.substr(0,
-			nameFirstImage.size() - (FILEEXTENSION + 1));
+	name = nameFirstImage.substr(0,	nameFirstImage.size() - (FILEEXTENSION + 1));
 
 	//Out for testing purposes
 	/*cout << "Enter the name of the manually marked image" <<std::endl;
@@ -73,22 +63,19 @@ auto main(int argc, char* argv[]) -> int {
 	clock_t begin = clock();
 	whiteDotsManualRVE = whiteDotsVector(manualRVE);
 	whiteDotsAutoRVE = whiteDotsVector(autoRVE);
-	proportionalwhiteDotsAutoRVE = RealSizeWhiteDotsVector(autoRVE,
-			&firstPosition);
+	proportionalwhiteDotsAutoRVE = RealSizeWhiteDotsVector(autoRVE,	&firstPosition);
 
 	if (argc > 1) {
 		createBlackSumImage(firstImage.rows, firstImage.cols, name + SUMNAME);
 		totalImages = atoi(argv[1]);
 		sumRVE.resize(whiteDotsAutoRVE.size()); // sumRVE size is equal to WhitedotsRVE
 		fill(sumRVE.begin(), sumRVE.end(), 0); //  Starting sumRVE with zeros
-		transform(sumRVE.begin(), sumRVE.end(), whiteDotsManualRVE.begin(),
-				sumRVE.begin(), std::plus<uint>());
+		transform(sumRVE.begin(), sumRVE.end(), whiteDotsManualRVE.begin(), sumRVE.begin(), std::plus<uint>());
 
 		cout << "An additional file containing the mean of " << totalImages
 				<< " images will  be created" << endl;
 		for (auto i = 0; i < totalImages; i++) {
-			fill(whiteDotsAdditionalRVE.begin(), whiteDotsAdditionalRVE.end(),
-					0);
+			fill(whiteDotsAdditionalRVE.begin(), whiteDotsAdditionalRVE.end(), 0);
 
 			/*cout << "Enter the name of the image number "<< i+1 <<endl;
 			 cin >> nameAdditionalImage;
@@ -100,31 +87,23 @@ auto main(int argc, char* argv[]) -> int {
 			absdiff(firstImage, additionalImage, additionalRVE); //additionalRVE= firstImage - additionalImage ;
 			std::cout << "Procesing: " + (name + convert.str() + ".png" + " ");
 			whiteDotsAdditionalRVE = whiteDotsVector(additionalRVE);
-			createSumOfInputs(whiteDotsAdditionalRVE, firstImage.rows,
-					firstImage.cols, name + SUMNAME);
-			transform(sumRVE.begin(), sumRVE.end(),
-					whiteDotsAdditionalRVE.begin(), sumRVE.begin(),
-					std::plus<uint>());
+			createSumOfInputs(whiteDotsAdditionalRVE, firstImage.rows, firstImage.cols, name + SUMNAME);
+			transform(sumRVE.begin(), sumRVE.end(), 	whiteDotsAdditionalRVE.begin(), sumRVE.begin(),	std::plus<uint>());
 
 		}
 
 		meanRVE = vectorMean(sumRVE, totalImages + 1, whiteDotsAutoRVE.size());
-		proportionalMeanRVE = proportionalVectorMean(sumRVE, totalImages + 1,
-				proportionalwhiteDotsAutoRVE.size(), firstPosition);
-		createOutput(meanRVE, firstImage.rows, firstImage.cols,
-				name + MEANNAME);
+		proportionalMeanRVE = proportionalVectorMean(sumRVE, totalImages + 1, proportionalwhiteDotsAutoRVE.size(), firstPosition);
+		createOutput(meanRVE, firstImage.rows, firstImage.cols,	name + MEANNAME);
 		//Mat show=imread("meanRVE.png",IMREAD_GRAYSCALE);
 		//namedWindow( "Mean white dots image", CV_WINDOW_KEEPRATIO );
 		//imshow("Mean white dots image",show);
 
 	}
-	createOutput(whiteDotsManualRVE, firstImage.rows, firstImage.cols,
-			name + OUTPUTNAME);
-	createSumOfInputs(whiteDotsManualRVE, firstImage.rows, firstImage.cols,
-			name + SUMNAME);
+	createOutput(whiteDotsManualRVE, firstImage.rows, firstImage.cols, name + OUTPUTNAME);
+	createSumOfInputs(whiteDotsManualRVE, firstImage.rows, firstImage.cols,	name + SUMNAME);
 	rootMeanSquareDeviation(meanRVE, whiteDotsAutoRVE);
-	RealsizeRootMeanSquareDeviation(proportionalwhiteDotsAutoRVE,
-			whiteDotsAdditionalRVE, firstPosition);
+	RealsizeRootMeanSquareDeviation(proportionalwhiteDotsAutoRVE, whiteDotsAdditionalRVE, firstPosition);
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 	cout << "ELAPSED TIME:  " << elapsed_secs << "seconds";
@@ -157,8 +136,7 @@ bool createOutput(vector<uint> source, uint numRows, uint numCols,
 
 /*******************************************************************************************/
 /* This function compute the Root Mean Square Deviation (RMSD) of a couple of vectors */
-double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,
-		const vector<uint> manualWhiteDots) {
+double rootMeanSquareDeviation(const vector<uint> autoWhiteDots, const vector<uint> manualWhiteDots) {
 	int vectorSize = autoWhiteDots.size();
 
 	double sum = 0;
@@ -166,11 +144,7 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,
 	/* RMSD*/
 	/*x= root square of 1/n sum 1 until n (pointA-pointB) */
 	for (auto i = 0; i < vectorSize; i++) {
-		sum = sum
-				+ pow(
-						static_cast<double>(autoWhiteDots.at(i))
-								- static_cast<double>(manualWhiteDots.at(i)),
-						2);
+		sum = sum + pow(static_cast<double>(autoWhiteDots.at(i))- static_cast<double>(manualWhiteDots.at(i)), 2);
 
 	}
 	sum = sum / vectorSize;
@@ -180,20 +154,14 @@ double rootMeanSquareDeviation(const vector<uint> autoWhiteDots,
 	return result;
 }
 /********************************************************************************************/
-double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots,
-		const vector<uint> manualWhiteDots, int startingPos) {
+double RealsizeRootMeanSquareDeviation(const vector<uint> autoWhiteDots, const vector<uint> manualWhiteDots, int startingPos) {
 	int vectorSize = autoWhiteDots.size();
-
 	double sum = 0;
 	double result = 0;
 	/* RMSD*/
 	/*x= root square of 1/n sum 1 until n (pointA-pointB) */
 	for (auto i = 0; i < vectorSize; i++) {
-		sum = sum
-				+ pow(
-						static_cast<double>(autoWhiteDots.at(i))
-								- static_cast<double>(manualWhiteDots.at(
-										i + startingPos)), 2);
+		sum = sum + pow(static_cast<double>(autoWhiteDots.at(i)) - static_cast<double>(manualWhiteDots.at(i + startingPos)), 2);
 	}
 
 	sum = sum / vectorSize;
